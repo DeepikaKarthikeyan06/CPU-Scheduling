@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CPU Scheduling Simulator</title>
+<style>
+body { font-family: Arial; text-align: center; background:#f2f2f2; }
+input, button { margin:5px; padding:8px; }
+table { margin:auto; border-collapse: collapse; }
+td, th { border:1px solid black; padding:8px; }
+button { background:#007bff; color:white; border:none; }
+</style>
+</head>
+
+<body>
+
+<h2>CPU Scheduling Simulator</h2>
+
+<label>Number of Processes:</label>
+<input type="number" id="n" value="3"><br>
+
+<button onclick="generateInputs()">Enter Process Details</button>
+
+<div id="inputs"></div>
+
+<select id="algo">
+  <option value="fcfs">FCFS</option>
+  <option value="sjf">SJF (Non-Preemptive)</option>
+</select><br>
+
+<button onclick="calculate()">Run</button>
+
+<h3 id="result"></h3>
+
+<script>
+let processes = [];
+
+function generateInputs() {
+    let n = document.getElementById("n").value;
+    let html = "<table><tr><th>Process</th><th>Arrival Time</th><th>Burst Time</th></tr>";
+
+    for (let i = 0; i < n; i++) {
+        html += `<tr>
+        <td>P${i}</td>
+        <td><input id="at${i}" type="number" value="0"></td>
+        <td><input id="bt${i}" type="number" value="1"></td>
+        </tr>`;
+    }
+
+    html += "</table>";
+    document.getElementById("inputs").innerHTML = html;
+}
+
+function calculate() {
+    let n = document.getElementById("n").value;
+    let algo = document.getElementById("algo").value;
+    processes = [];
+
+    for (let i = 0; i < n; i++) {
+        processes.push({
+            id: i,
+            at: parseInt(document.getElementById(`at${i}`).value),
+            bt: parseInt(document.getElementById(`bt${i}`).value)
+        });
+    }
+
+    if (algo === "sjf") {
+        processes.sort((a, b) => a.bt - b.bt);
+    } else {
+        processes.sort((a, b) => a.at - b.at);
+    }
+
+    let time = 0, totalWT = 0, totalTAT = 0;
+
+    let resultHTML = "<table><tr><th>Process</th><th>WT</th><th>TAT</th></tr>";
+
+    processes.forEach(p => {
+        if (time < p.at) time = p.at;
+
+        let wt = time - p.at;
+        let tat = wt + p.bt;
+
+        totalWT += wt;
+        totalTAT += tat;
+
+        time += p.bt;
+
+        resultHTML += `<tr><td>P${p.id}</td><td>${wt}</td><td>${tat}</td></tr>`;
+    });
+
+    resultHTML += "</table>";
+
+    resultHTML += `<br>Average WT: ${(totalWT/n).toFixed(2)}`;
+    resultHTML += `<br>Average TAT: ${(totalTAT/n).toFixed(2)}`;
+
+    document.getElementById("result").innerHTML = resultHTML;
+}
+</script>
+
+</body>
+</html>
